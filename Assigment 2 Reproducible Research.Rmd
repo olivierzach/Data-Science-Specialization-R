@@ -1,0 +1,85 @@
+---
+title: "Reproducible Research Assignment 2"
+author: "Zach Olivier"
+date: "June 10, 2017"
+output: html_document
+---
+
+
+
+## NOAA Analysis Snynopsis
+
+Purpose of the analysis is to find what type of events are the most harmful in terms of fatalities and property damage. Data is pulled from the U.S. National Oceanic and Atmospheric Administration (NOAA) storm database. All analysis procedures and steps are listed below.  
+
+## Data Processing and Cleaning
+
+First steps is to load the data and prepare it for analysis. Lets read in the file, explore the data using dim and head, and then rename some event types for clarity.
+
+```{r,cache=TRUE}
+data <- read.csv("/Users/zacholivier/Desktop/RTutorialDataSets/StormData.csv")
+data$EVTYPE = toupper(data$EVTYPE)
+dim(data)
+
+head(data)
+
+data[data$EVTYPE == "TSTM WIND", ]$EVTYPE = "THUNDERSTORM WIND"
+data[data$EVTYPE == "THUNDERSTORM WINDS", ]$EVTYPE = "THUNDERSTORM WIND"
+data[data$EVTYPE == "RIVER FLOOD", ]$EVTYPE = "FLOOD"
+data[data$EVTYPE == "HURRICANE/TYPHOON", ]$EVTYPE = "HURRICANE-TYPHOON"
+data[data$EVTYPE == "HURRICANE", ]$EVTYPE = "HURRICANE-TYPHOON"
+
+
+```
+
+## Event Analysis
+
+Lets dig into the data to see which events are most harmful. In the data set, there are multiple types of damage; fatality, injury, property damage, crop damage. The first set of code aggregates the data to see which has the highest totals of each type of damage. Finally, let's plot each to see if there any connections between all types of damage. 
+
+```{r, cache = T}
+
+#fatality summary
+fataldat <- aggregate(FATALITIES ~ EVTYPE, data = data, sum)
+fatal1 <- fataldat[fataldat$FATALITIES > 0, ]
+fatallist <- fatal1[order(fatal1$FATALITIES, decreasing = TRUE), ]
+head(fatallist)
+
+#injury summary
+injurydat <- aggregate(INJURIES ~ EVTYPE, data = data, sum)
+injury1 <- injurydat[injurydat$INJURIES > 0, ]
+injurylist <- injury1[order(injury1$INJURIES, decreasing = TRUE), ]
+head(injurylist)
+
+#property damage summary
+propdat <- aggregate(PROPDMG ~ EVTYPE, data = data, sum)
+prop1 <- propdat[propdat$PROPDMG > 0, ]
+proplist <- prop1[order(prop1$PROPDMG, decreasing = TRUE), ]
+head(proplist)
+
+#crop damage summary
+cropdat <- aggregate(CROPDMG ~ EVTYPE, data = data, sum)
+crop1 <- cropdat[cropdat$CROPDMG > 0, ]
+croplist <- crop1[order(crop1$CROPDMG, decreasing = TRUE), ]
+head(croplist)
+
+
+#fatality chart
+barplot(fatallist[1:10, 2],col = rainbow(10), legend.text = fatallist[1:10,
+    1], ylab = "Fatality", main = "Top 10 Events: Fatalities")
+
+#injury chart
+barplot(injurylist[1:10, 2],col = rainbow(10),  legend.text = injurylist[1:10,
+    1], ylab = "Injuries", main = "Top 10 Events: Injuries")
+
+#property damage chart
+barplot(proplist[1:10, 2],col = rainbow(10), legend.text = proplist[1:10,
+    1], ylab = "Property Damange", main = "Top 10 Events: Property Damage")
+
+#crop damage chart
+barplot(croplist[1:10, 2],col = rainbow(10), legend.text = croplist[1:10,
+    1], ylab = "Crop Damage", main = "Top 10 Events: Crop Damage")
+```
+
+## Final Summary
+
+Based on the analysis, tornadoes cause the most amount of fatalities and injuries and property damage. Droughts cause the most property damage.
+

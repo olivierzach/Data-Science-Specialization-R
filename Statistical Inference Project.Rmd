@@ -1,0 +1,172 @@
+---
+title: "Statistical Inference Course Project"
+author: "Zach Olivier"
+date: "7/23/2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Statisical Inference Project
+
+This project contains two sections:
+        1. Simulation Exercise to solidify basic inference concepts
+        2. Analysis on the ToothGrowth R dataset
+        
+## Simulation Exercise Summary
+
+The goal of part 1 is to examine the exponentail distribution under the Central Limit Theorm. I will simulate the expoential distribution in R for different averages of expoentials over 1,000 simulations.
+
+For reference: The simulation of the expoential distribution in R is rexp(n, lambda), with lambda as the rate parameter. Mean = 1/lambda and Standard Deviation = 1/lambda.
+
+Once the simulation is complete, we will compare the mean, variance, and standard deviation against our simulations. This will put the sample statistics up against the theoretical statistics.
+
+Finally, I will plot the distribution of the simulation to verify the normal distribution.
+
+All analysis is performed in the R code chunk below. Please see documentation for details.
+
+
+
+```{r}
+
+# install needed packages for analysis
+library(knitr)
+library(ggplot2)
+
+# set up exponetial distribution in R with inputs from question prompt
+
+# exponential sample size
+n = 40  
+# parameter rate for simulation
+lambda = 0.2
+# number of simulations
+sim = 1000
+# confidence interval quantile
+quant = 1.96
+# reproducibility flag - set seed
+set.seed(500)
+
+# set up simulation matrix for all samples (matrix = 40 columns (sample size) and 1,000 rows (total simulations)
+
+exp_sim = matrix(rexp(n*sim, rate = lambda), sim)
+
+# calculate averages for the 40 values based on each of the 1,000 simulations
+
+exp_avg = rowMeans(exp_sim)
+
+
+# compare sample mean, variance, and standard deviation against theoretircal mean, variance and standard deviation
+
+sample_mean_exp = mean(exp_avg) # sample mean
+sample_mean_exp
+
+theor_mean_exp = 1/lambda # theoretical mean
+theor_mean_exp
+
+sample_var_exp = var(exp_avg) # sample variance
+sample_var_exp
+
+theor_var_exp = (1/lambda) ^2 / (n) #theoretical variance
+theor_var_exp
+
+sample_sd_exp = sd(exp_avg) #sample standard deviation
+sample_sd_exp
+
+theor_sd_exp = 1/(lambda*sqrt(n)) # theoretical standard deviation
+theor_sd_exp
+
+
+# histogram of the simulation data with sample and theorictical mean and standard deviation overlayed
+
+plot_exp <- data.frame(exp_avg)
+e <- ggplot(plot_exp, aes(x =exp_avg))
+e <- e + geom_histogram(aes(y=..density..), colour="black",
+                        fill = "blue")
+e <- e + labs(title = "Exponential Distribution", x = "Mean of Simulation", y = "Density")
+e <- e + geom_vline(aes(xintercept = sample_mean_exp, colour = "green"))
+e <- e + geom_vline(aes(xintercept = theor_mean_exp, colour = "violet"))
+e <- e + stat_function(fun = dnorm, args = list(mean = sample_mean_exp, sd = sample_sd_exp), color = "blue", size = 1.0)
+e <- e + stat_function(fun = dnorm, args = list(mean = theor_mean_exp, sd = theor_sd_exp), colour = "red", size = 1.0)
+e
+
+
+# create the sample and theoretircal confidence interval to compare
+
+sample_CI = round(mean(exp_avg) + c(-1,1)*quant*sd(exp_avg)/sqrt(n),3)
+sample_CI
+
+theor_CI = theor_mean_exp + c(-1,1) * quant * sqrt(theor_var_exp)/sqrt(n)
+theor_CI 
+
+```
+
+## Simulation Exercise Results
+
+All three of the sample statistics I calculated for the expoential distribution are extremely close to thier theoretical value.
+
+The histogram clearly shows the sample values are close to thier theoretical counterparts, and both mean and variance follow a normal distribution. 
+
+The confidence interval for both sample and theoretical are also extremely close.
+
+Each of these is absolutely expected based on the Central Limit Theorm - the more observations we have, the closer the sample should mirror the theoretical distribution. 
+
+
+
+
+
+## Tooth Growth Analysis Summary
+
+The goal of part 2 is to analyze the ToothGrowth data with basic statistical inference techniques.
+
+The analysis will load the data, provide a basic summary, show comparisons between tooth growth by supplement and dose and then summarize the findings. 
+
+All analysis is contained in the R code below. Please see the documentation for details. 
+
+```{r}
+
+# install needed packages for analysis
+library(ggplot2)
+
+# load the ToothGrowth data set and prepare for analysis
+data("ToothGrowth")
+
+# summary statistic results
+summary(ToothGrowth)
+
+#dataset summary
+str(ToothGrowth)
+
+# view the first rows of the data
+ToothGrowth[1:10,]
+
+# plot tooth growth by supplement type
+
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=supp)) +
+    geom_bar(stat="identity",) +
+    facet_grid(. ~ supp) +
+    xlab("Dosage (miligrams") +
+    ylab("Tooth Length") +
+    guides(fill=guide_legend(title="Supplement"))
+
+# use t-test to compare tooth length versus supplement
+
+t.test(len~supp, data = ToothGrowth)
+
+# repeat t-test for various levels of dosage
+
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == .5, ]) # dose at level .5
+
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 1, ]) # dose at level 1
+
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 2, ]) # dose at level 2
+
+
+
+```
+## Tooth Growth Analysis Results
+
+Increasing dosage results correlated with longer teeth. Results also show that we cannot determine a difference between supplement type and tooth growth. 
