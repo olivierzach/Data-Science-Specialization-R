@@ -1,0 +1,59 @@
+---
+title: "Pitchfork Application Presentation"
+author: "Zach Olivier"
+date: "3/17/2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exploring Pitchfork Application
+
+The music review website Pitchfork has been established as the source of new, exicting and trending music. Since its inception in the early 1990s reviewing under the radar records with it's own distictintive flair - Pitchfork has evolved into a congomlerate of music discovery in all genres. 
+
+Now over 20 years young, Pitchfork has reviewed and scored over 20,000 albums ranging from a multitute of genres. How can a up and coming music lover sift through this vast expanse of music and find that next album that changes thier lives?
+
+The Exploring Pitchfork App is our attempt to leverage the rich history of Pitchfork's reviews and allow you to easily surf through all 20,000+ music reviews while providing data-driven added value.
+
+## Building our Pitchfork: The Data
+
+The data comes from Nolan Conaway who web scraped over 18,000+ Pitchfork reviews and posted the data to the predictive analytics hub Kaggle.
+
+You too can explore the dataset here: https://www.kaggle.com/nolanbconaway/pitchfork-data
+
+This dataset is provided as a sqlite database with the following tables: artists, content, genres, labels, reviews, years. For column-level information on specific tables, refer to the Metadata tab.
+
+Web scraping is almost as cool as new music - see here for how to do it: https://www.crummy.com/software/BeautifulSoup/
+
+Thanks to Nolan we have a wealth of data to expose to new users looking to dive into the storied history of Pitchfork. 
+
+## Building our Pitchfork: The App
+
+The application is built on top of the Pitchfork review database and allows users to simply see the score distribution of the reviews by year and genre. 
+
+Descriptive statistics are given to see how each genre has been scored over time and show trends on how new albums are being scored now. 
+
+There is also view functionality that lets you see the highest scoring albums of the genre a user selects. 
+
+The app is so simple you can start discovering your new favorite music in seconds. 
+
+## Building our Pitchfork: You
+
+The app was built in R Shiny and developed as a part of the Data Products Coursera Course in Data Science. 
+
+To access the application, go here: http://olivierz.shinyapps.io/Explore_Pitchfork
+
+## Building our Pitchfork: Your Ideas
+
+How can this application be improved?
+
+What other data driven analysis would be beneficial?
+
+Using this dataset: can you tell me?
+
+Do review scores for individual artists generally improve over time, or go down?
+How has Pitchfork's review genre selection changed over time?
+Who are the most highly rated artists? The least highly rated artists?
+

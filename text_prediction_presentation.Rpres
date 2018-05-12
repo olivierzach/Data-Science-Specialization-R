@@ -1,0 +1,31 @@
+Next Word Prediction Algorithm
+========================================================
+author: Zach Olivier
+date: 5/1/2018
+autosize: true
+```{r}
+
+```
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+Slide With Code
+========================================================
+
+```{r}
+summary(cars)
+```
+
+Slide With Plot
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```

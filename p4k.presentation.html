@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exploring Pitchfork</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Exploring Pitchfork">
+  <meta name="author" content="Zach Olivier">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="http://slidifylibraries2.googlecode.com/git/inst/libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/js/slides" 
+    src="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Exploring Pitchfork</h1>
+    <h2></h2>
+    <p>Zach Olivier<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Exploring Pitchfork Application</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The music review website Pitchfork has been established as the source of new, exicting and trending music. Since its inception in the early 1990s reviewing under the radar records with it&#39;s own distictintive flair - Pitchfork has evolved into a congomlerate of music discovery in all geners. </p>
+
+<p>Now over 20 years young, Pitchfork has reviewed and scored over 20,000 albums ranging from a multitute of genres. How can a up and coming music lover sift through this vast expanse of music and find that next album that changes thier lives?</p>
+
+<p>The Exploring Pitchfork App is our attempt to leverage the rich history of Pitchfork&#39;s reviews and allow you to easily surf through all 20,000+ music reviews while providing data-driven added value. </p>
+
+<h2>Building our Pitchfork: The Data</h2>
+
+<p>The data comes from Nolan Conaway who web scraped over 18,000+ Pitchfork reviews and posted the data to the predictive analytics hub Kaggle.</p>
+
+<p>You too can explore the dataset here: <a href="https://www.kaggle.com/nolanbconaway/pitchfork-data">https://www.kaggle.com/nolanbconaway/pitchfork-data</a></p>
+
+<p>This dataset is provided as a sqlite database with the following tables: artists, content, genres, labels, reviews, years. For column-level information on specific tables, refer to the Metadata tab.</p>
+
+<p>Web scraping is almost as cool as new music - see here for how to do it: <a href="https://www.crummy.com/software/BeautifulSoup/">https://www.crummy.com/software/BeautifulSoup/</a></p>
+
+<p>Thanks to Nolan we have a wealth of data to expose to new users looking to dive into the storied history of Pitchfork. </p>
+
+<h2>Building our Pitchfork: The App</h2>
+
+<p>The application is built on top of the Pitchfork review database and allows users to simply see the score distribution of the reviews by year and genre. Descriptive statistics are given to see how each genre has been scored over time and show trends on how new albums are being scored now. </p>
+
+<p>There is also view functionality that lets you see the highest scoring albums of the genre a user selects. </p>
+
+<p>The app is so simple you can start discovering your new favorite music in seconds. </p>
+
+<h2>Building our Pitchfork: You</h2>
+
+<p>The app was built in R Shiny and developed as a part of the Data Products Coursera Course in Data Science. </p>
+
+<p>To access the application, go here: <insert shiny link here></p>
+
+<h2>Building our Pitchfork: Your Ideas</h2>
+
+<p>How can this application be improved?</p>
+
+<p>What other data driven analysis would be beneficial?</p>
+
+<p>Using this dataset: can you tell me?</p>
+
+<pre><code>    Do review scores for individual artists generally improve over time, or go down?
+    How has Pitchfork&#39;s review genre selection changed over time?
+    Who are the most highly rated artists? The least highly rated artists?
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Exploring Pitchfork Application'>
+         1
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="http://slidifylibraries2.googlecode.com/git/inst/libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>

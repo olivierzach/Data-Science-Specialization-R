@@ -1,0 +1,72 @@
+---
+title: "A.S.A.P Model: An Advanced Next Word Prediction Algorithm"
+author: "Zach Olivier"
+date: "5/1/2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Predicting Your Next Words
+
+Many texting systems today have a built-in "next word" predictor algorithm within their interface.
+
+Any type of message sending platform can benefit from auto-complete or auto-suggesting of the next word in the message.
+
+A quick and accurate algorithm will save users time, frustration, and drive up user engagement within the platform. 
+
+Building a state-of-the-art auto-suggestion algorithm is of paramount important for any messaging platform - from texting to group messages - a well-tuned suggestion can give your application a feeling of connection to your user-base.
+
+This presentation highlights the underpinnings of the Automated Suggestion Application Predictor (A.S.A.P.) model and discussed the key benefits compared to other text predictions algorithms in the market. 
+
+
+
+## A.S.A.P Model Summary
+
+The A.S.A.P model is a "next word" prediction model with three main components that distinguish it from other models. 
+
+- Accuracy: Model is trained on a large corpus of text grams from multiple sources (Twitter, News Articles, Blogs Articles)
+- Distance Calculation: if no match is found, algorithm to switch from search to distance calculation to determine appropriate recommendation
+- User Database: text strings that are not found by the algorithm will be stored in a separate search table - the algorithm will learn the unique vernacular of each individual user
+
+An accurate off-the-shelf text prediction model can instantly benefit your user-base. With additional Distance Calculation and User Database features - your platform will connect more deeply with your end user that other competitive products. 
+
+## Building the A.S.A.P. Model 
+
+The A.S.A.P. model was assembled in three pieces.
+
+- Build the initial n-gram frequency tables - these are used as the search data base to match the incoming string and output a prediction
+- Assemble the model to efficiently search through the tables, or use the character change distance calculation if no match is found
+- Develop the User Database infrastructure that will save uncommon text inputs into an additional database for future predictions
+
+## Inside an A.S.A.P. Prediction
+
+Below is the process flow of the A.S.A.P model.  
+
+1. Input is a text string typed by the user
+2. Algorithm will take in the string, clean it, and split it into a series of n-grams
+3. Frequency tables will be searched for an exact match to any of the input strings n-grams
+4. If there is a match - the next word based on Term Frequency will be outputted as the prediction
+5. If there is no exact match - algorithm will implement the Jarro-Wilkes distance calculation in order to predict the next word
+6. The distance calculation will select five of the top scoring distance strings as the "nearest neighbors"
+7. The distance calculation will then use Term Frequency of the five high-distance score observations to give a prediction
+8. Input strings without a match and a set of low-distance neighbors will be added to the frequency tables for future predictions
+
+## Application Demo
+
+Below is a link to test out the A.S.A.P model within a R Shiny application. Follow the instructions on screen to see the A.S.A.P. model predict the next word based on your inputted text. 
+
+Link to application: http://olivierz.shinyapps.io/capstone_text_prediction
+
+Simply input your text string and click submit. The key pieces of the algorithm will be shown in the applications main panel.
+
+These key differentiating features are:
+
+- Frequency Table Prediction
+- Distance Calculation Prediction if no exact match
+- User Database update if inputted string is sufficiently "rare"
+
+
+

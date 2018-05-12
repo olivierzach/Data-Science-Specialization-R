@@ -1,0 +1,198 @@
+---
+title: 'Motor Trend: Fuel Economy Study'
+author: "Zach Olivier"
+date: "2/23/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Executive Summary: Fuel Economy Study
+
+Miles-per-Gallon (MPG) is possibly the most impactful metric used to judge new vehicles in the automotive industry. MPG is often the deciding factor in a new car purchase - higher MPG is saved money every time you fill up - driving down cost of ownership. MPG conscious consumer behavior forces automakers to produce efficient "fuel-sipping" cars. MPG is a true competitive advantage in the race for sales. 
+
+Further, the Environmental Protection Agency (EPA) has imposed strict MPG threshold goals for all OEMs. Setting fleet-wide average MPG goals at 30+ MPG by 2022 - automakers are investing heavily in engineering to improve fuel economy of their vehicles. 
+
+Complacency in fuel economy innovation is a death sentence in today's auto market. Customers will buy the competitor's vehicle that provides a lower lifetime cost. The EPA will fiscally punish car brands not meeting their strict MPG goals - possibly putting major players out of business. MPG is extremely important in the automotive landscape - and may even determine the fate of the business entirely. 
+
+Today we take MPG under the microscope to examine which features of a car improve or degrade fuel economy performance. We will rigorously analyze the relationship between transmission type and MPG performance. 
+
+        Automatic or Manual: which is better for fuel economy?
+
+        Customer Savings: How much more will a manual transmission save you in cost of ownership?
+
+        Industry Impact: Will producing more manual transmission goals help car brands reach the EPA's lofty goals?
+
+
+
+
+### Explore: Which transmission drives MPG performance?
+
+Surprisingly, manual transmissions tower over automatic transmission in fuel economy performance. Only two of the manual transmission vehicles sampled fell below the industry median miles per gallon.
+
+        The mean MPG of manual transmission vehicles is 24 mpg versus just 17 for automatic. 
+
+Intuitively - we would expect automatic transmissions to be more fuel-efficient. Drivers manually shifting gears is imperfect and these slight delays in gear shift cause more fuel consumption. Our initial findings seem to show the exact opposite. 
+
+Is the final answer? Should you buy a manual transmission to save the most money? Should OEMs stop making automatic vehicles all together?
+
+Not quite. Let's continue to dig deeper. 
+
+
+
+
+```{r, echo = F, message=FALSE}
+# install packages
+library(dplyr);library(ggplot2);library(GGally);library(ggthemes)
+
+# load the data
+data(mtcars)
+
+# format the data
+mtcars <- mtcars %>% mutate(
+        cyl = as.factor(cyl),
+        vs = as.factor(vs),
+        gear = as.factor(gear),
+        carb = as.factor(carb),
+        am = as.factor(ifelse(am == 0, "Automatic", "Manual"))
+)
+
+means <- aggregate(mpg ~ am, mtcars, function(i) round(mean(i)))
+
+# plot the relationship between 
+ggplot(data = mtcars) +
+        geom_boxplot(aes(x = am, y = mpg, color = am, group = am)) +
+        geom_point(aes(x = am, y = mpg, color = am), pch = 21, alpha = .5) +
+        geom_hline(yintercept = median(mtcars$mpg), linetype = "dotted", color = "dark grey") +
+        theme_tufte() +
+        labs(title = "Miles-Per-Gallon Comparision: Transmission Type",
+             subtitle = "Manual outperforms Automatic by a wide margin",
+             color = "Transmission Type") +
+        xlab("") +
+        ylab("Miles-per-Gallon") +
+        annotate("text", y = 20, x = 2.42, label = "Industry Median",size = 2.3,
+                 color = "black") +
+        theme(legend.position = "none") +
+        geom_text(data = means, aes(x = am, y = mpg,label = mpg, color = am), vjust = 1)
+
+
+```
+
+### Explore: Modeling the affect of tranmission
+
+There has to be more to the relationship between MPG and transmission. Are there other variables could help explain the difference in MPG between transmission type?
+
+To examine this we first build a simple one variable linear regression. We regress transmission on mpg and interpret the results. 
+
+        We see strong evidence that the effect of manual transmission is not zero (coefficient p = .000285 < .05). 
+        
+        The F-statistic tells us there is some overall relationship between transmission and mpg. 
+
+        The multiple R^2 however is not strong, only ~36% of the total variance is explained by this simple model. 
+        
+This leads us to believe that although there is some relationship between manual transmission and mpg, we do not have the full picture. 
+
+```{r, echo=FALSE}
+# one variable model 
+fit1 <- lm(mpg ~ am, data = mtcars)
+summary(fit1)
+
+
+```
+
+
+### Explore: What variables "explain" fuel economy?
+
+To find other variable that may better explain the relationship between MPG and Transmission we need to investigate which variables are correlated with MPG and Transmission. 
+
+Looking down the left hand column of the pairs plot below we notice some interesting behaviors of our sample.
+
+        Manual tranmissions in our sample have relatively low displacement values.
+
+        Manual transmissions in our sample have relatively low horsepower values.
+
+        Manual transmission in our sample have relatively low weight values. 
+
+Each of these variables have high correlation with MPG - which may be biasing our results. Perhaps weight, horsepower, and displacement are the "true" indicators of mpg performance, and transmission in our simple model is getting attributed these affects. 
+
+
+
+
+```{r, echo=FALSE}
+# pairs plot to investigate correlation
+mtcars <- mtcars %>% dplyr::select(.,-qsec, -carb, -vs, -gear)
+
+ggpairs(mtcars, mapping = ggplot2::aes(color = am), 
+        lower = list(combo=wrap("facethist", binwidth = 1)),
+        title = "Miles-Per-Gallon Comparison: Transmission Type") +
+        theme_tufte()
+
+
+
+```
+
+
+
+### Explore: Modeling the affect of multiple variables
+
+To test our hypothesis that transmission is getting assigned the affect of other variables in our simple model - we will fit a multiple models and compare them against each other.
+
+First we see the affect of adding displacement, weight and horsepower to the simple model. 
+
+        Adding weight, horsepower and displacement gives us a significant gain in variance explaination (F-statistic)
+
+Next we compare a model with all variables correlated with mpg expect transmission to a model with all variables including transmission. This will tell us if adding transmission to a model with all other variables adds significant variance explanation. 
+
+        Adding transmission to the model does not give us a significant gain in variance explaination. (F-statistic) 
+
+
+
+```{r, echo=FALSE}
+# pairs plot to investigate correlation
+fit2 <- lm(mpg ~ disp + wt + hp + am, data = mtcars)
+
+# anova test between simple model and the "full" model
+anova(fit1, fit2)
+
+# fit without transmission variable
+fit3 <- lm(mpg ~ disp + wt + hp, data = mtcars)
+
+# comparison between "full" model and "full" model without transmission
+# does adding transmission to the "full" model result in a better fit?
+anova(fit3, fit2)
+
+```
+
+
+
+### Conclusion: Transmission Does Not Explain MPG
+
+By including weight, horsepower and displacement in our model we see that transmission no longer gives us enough explanation of variance to keep in the model. 
+
+        The variables of weight, horsepower and displacement are better predictors for mpg. 
+        
+        This matches the trend of OEMs making underpowered, lightweight vehicles to achieve better MPG performance. 
+
+Didn't my simple model show there was some affect of transmission on mpg? Yes. 
+
+However, the relationship did not explain enough variance after the other highly correlated variables were included in the model. The F statistic from our anova results is based on the number of predictors added to the model - the added variable needs to overcome a certain threshold of variance explained to be included over the penalty of adding another predictor. In our case, transmission did not overcome this threshold. 
+
+We conclude by adding that automakers should focus on weight, horsepower and cylinders to meet their internal and external MPG goals. 
+
+        Each unit increase in weight reduces mpg performance by ~4 mpg holding displacement and horsepower constant.  
+
+```{r, echo=FALSE}
+# fit without transmission variable
+fit3 <- lm(mpg ~ disp + wt + hp, data = mtcars)
+summary(fit3)$coef
+
+# model diagnostics
+par(mfrow = c(2,2))
+plot(fit3)
+
+```
+
+
+

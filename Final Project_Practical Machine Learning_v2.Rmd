@@ -1,0 +1,185 @@
+---
+title: "Practical Machine Learning Final Project"
+author: "Zach Olivier"
+date: "1/28/2018"
+output: html_document
+---
+
+## Project Introduction
+
+The goal of this project to to model how well a personal activity is performed. We will attempt this my using data collected from accelerometers on the belt,forearm, arm and dumbell of 6 participants. Each participant was asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
+
+Click the link here for more information: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset)
+
+## Data
+
+Training Data: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+Testing Data: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. 
+
+## Motivation
+
+We will aim to predict the "classe" variable from the training set. To do this we will:
+        1. Read in the data
+        2. Clean / transform the data for modeling
+        3. Build and test a few select machine learning models - "classification" models
+        4. Provide information on our cross validation choices, and the out of sample error
+        5. Predict our models "back"" on 20 different test cases in the course quiz
+
+
+## Load Packages
+
+```{r, echo = F}
+library(caret)
+library(ggplot2)
+library(rpart)
+```
+
+
+## Reading in the data
+
+```{r , echo = F}
+set.seed(353535)
+
+# read in the training data
+training <- read.csv("/Users/zacholivier/Downloads/pml-training.csv")
+
+# read in the testing data
+testing <- read.csv("/Users/zacholivier/Downloads/pml-testing.csv")
+
+# take a look at each dataset
+dim(training); dim(testing)
+
+
+```
+
+
+## Create Validation dataset from the training data
+
+```{r , echo = T}
+
+# parition the training data into two data sets
+inTrain <- createDataPartition(training$classe, p = .65, list = F)
+
+new.training <- training[inTrain, ]
+new.validation <- training[-inTrain,]
+
+# quickly view the results of the parition
+dim(new.training); dim(new.validation)
+
+
+```
+
+
+## Clean the Training and Validation datasets
+
+Remove any variable with "near zero" variance and any variables with NA. These transformations will also have to be applied to the training,
+validation, and testing sets. 
+
+```{r, echo = F}
+
+# use nearZeroVar function on the training data
+zero.train <- nearZeroVar(new.training, saveMetrics = T)
+new.training <- new.training[,zero.train$nzv == F]
+
+# use nearZeroVar function on the validation data
+zero.valid <- nearZeroVar(new.validation, saveMetrics = T)
+new.validation <- new.validation[,zero.valid$nzv == F]
+
+
+# remove the first column of the training dataset
+new.training<- new.training[c(-1)]
+
+
+# remove variables with NA more that 60% of observations
+train.v3  <- new.training
+for(i in 1:length(new.training)) {
+    if( sum( is.na(new.training[, i] ) ) /nrow(new.training) >= .7) {
+        for(j in 1:length(train.v3)) {
+            if( length( grep(names(new.training[i]), names(train.v3)[j]) ) == 1)  {
+                train.v3 <- train.v3[ , -j]
+            }   
+        } 
+    }
+}
+
+
+new.training <- train.v3
+rm(train.v3)
+
+
+# apply transformation steps to the validation and testing datasets
+clean.v1 <- colnames(new.training)
+clean.v2 <- colnames(new.training[,-58])
+new.validation <- new.validation[clean.v1]
+testing <- testing[clean.v2]
+
+dim(new.validation); dim(testing)
+
+
+```
+
+
+## Modeling Attempts:
+
+Model the datasets using Decision Tree and Generalized Boosted Regression. Ascertain the best fit from the models. Each will aim to best classifiy a "correct" or "incorrect" lift. 
+
+# Decision Tree Model
+
+```{r, echo = F}
+
+set.seed(123123)
+
+# Decision Tree Fit
+dt.fit <- rpart(classe ~ ., data = new.training, method = "class")
+
+# Decision Tree Predict
+pred.dt <- predict(dt.fit, new.validation, type = "class")
+
+# confusion matrix
+cm.dt <- confusionMatrix(pred.dt, new.validation$classe)
+cm.dt
+
+```
+
+
+# Boosted Regression Model
+
+```{r, echo = F}
+
+set.seed(123123)
+
+# Boosted Regression Fit
+control <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+
+gbm.fit <- train(classe ~ ., data = new.training, method = "gbm",
+                 trControl = control, verbose = F)
+
+gbm.model <- gbm.fit$finalModel
+
+# Boosted Regression Predict
+pred.gbm <- predict(gbm.fit, new.validation)
+
+# confusion matrix
+cm.gbm <- confusionMatrix(pred.gbm, new.validation$classe)
+cm.gbm
+
+```
+
+
+## Applying the Models to the Testing Data
+
+Decision Tree Results: Accuracy is 89.24%
+
+Generalized Boosted Regression: Accuracy is 
+
+Generalized Boosted Regression results are stronger - let's use this model for final testing set prediction. Expected out of sample error is 0.48%. 
+
+```{r , echo = F}
+
+# predict the decision tree model back onto the testing
+pred.final <- predict(gbm.fit, data = testing)
+
+pred.final

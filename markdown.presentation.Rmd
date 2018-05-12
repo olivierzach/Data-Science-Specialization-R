@@ -1,0 +1,99 @@
+---
+title: "you can change this"
+author: "Zach Olivier"
+date: "2/26/2018"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Slide with Bullets
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Slide with R Output
+
+
+## MY NEW SLIDE!!
+wow this shit is rad
+
+## slide with a title
+#### a slide with out  a title - subheading
+#### another subtittle
+
+        - bullet list
+1. ordered list
+2. item b
+```{r cars, echo = TRUE}
+summary(cars)
+```
+
+## Slide with Plot
+
+```{r pressure}
+plot(pressure)
+```
+
+
+## text options
+plain text
+*italicized text*
+**bold text**
+
+`for (i %in% 1:10)`
+
+## my new slide
+
+look at all these different options we can choose from
+
+``` {r, comment = "$$$$", echo = T, eval = F}
+head(mtcars)
+
+
+```
+
+
+
+## plots with figures
+lets embed plots
+```{r, echo = F, fig.align= "center", fig.cap= "check this shit out"}
+plot(mtcars$wt, mtcars$mpg)
+
+
+
+```
+
+
+## if we knit this 
+        -we create a html file that we can bring up into our web browser
+        we can use this to push to rpubs and github
+        github does alot of the formatting for you
+        we can click on the html file to see the "raw" html of our html document
+        we can see the actual html uusing branch called gh-pages - all that is different is a url
+        it is username .github.io [path to html file]!!!
+        we now can host our slides on github!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

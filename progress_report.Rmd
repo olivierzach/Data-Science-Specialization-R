@@ -1,0 +1,260 @@
+---
+title: "Capstone Project - Progress Report"
+author: "Zach Olivier"
+date: "3/31/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project Introduction
+
+This document will review the progress I've made in the Data Science Capstone project.
+
+We will focus on three main steps:
+
+        - Reading in the data
+        - Exploratory Data Analysis
+        - Plans for modeling and application integration
+
+## Part 1: Read in the Data
+
+The first step to any data project is to read in and clean our data. In this project we have three large data sets that are composed on text from three major sources: Twitter, Blogs and News. 
+
+Below are the reading and cleaning steps taken to allow for deeper analysis.
+
+        - Read in the data
+        - Sample 5% from each source
+        - Clean data by removing numbers, punctuation, profanity, graphics and case
+        - Combine all three sources into one large Corpus
+
+``` {r packages, echo = FALSE, message = F}
+
+# define working directory
+setwd("/Users/zacholivier/Desktop/R/text_mine_capstone/en_US")
+
+# install needed packages
+pacman::p_load(tm, ggplot2, tidytext, data.table, tidyverse, rio, ggthemes, wordcloud, stringi)
+
+```
+
+```{r defines, echo =FALSE, message=FALSE}
+# read in and prep the data --------------------------------------------------------
+
+
+# list of common words we may want to filter out of analysis
+stop_words <- stop_words %>% as.tibble(.)
+
+# list of profanity words to censor out of analysis
+profanity <- readr::read_table("bad_words.txt", col_names = F) %>% 
+        filter(X1 != is.na(X1)) %>% 
+        rename(., word = X1) %>% 
+        rbind(c("niggas"))
+
+
+# function to clean text using tm
+cleanText <- function(x) {
+        
+        x %>% 
+        str_replace_all("[^[:graph:]]", " ") %>% 
+        removeNumbers() %>% 
+        removePunctuation() %>% 
+        tolower() %>% 
+        removeWords(., profanity$word)
+}
+
+```
+
+``` {r read, message = F, echo = F}
+
+path1 <- "en_US.blogs.txt"
+path2 <- "en_US.news.txt"
+path3 <- "en_US.twitter.txt"
+
+
+# read in data
+twitter <- readr::read_table("en_US.twitter.txt", col_names = F)
+blogs <- readr::read_table("en_US.blogs.txt", col_names = F) 
+news <- readr::read_table("en_US.news.txt", col_names = F)
+
+# summary stats of the source files
+(text_stats <- data.frame(
+        file_name = c("en_US.blogs","en_US.news","en_US.twitter"),
+        file_size = c(file.info(path1)$size/1024^2,
+                           file.info(path2)$size/1024^2,
+                           file.info(path3)$size/1024^2),
+        line_count = c(nrow(blogs), nrow(news), nrow(twitter)),
+        sample_size = c(round(nrow(blogs)*.05,0), round(nrow(news)*.05,0), round(nrow(twitter)*.05,0))
+        )
+        )
+
+```
+
+```{r clean}
+set.seed(23)
+
+# clean twitter data (sample)
+twitter_df <- sample_frac(twitter, .01) %>% 
+        tibble::rownames_to_column(., var = "line_id") %>% 
+        rename(., text = X1) %>% 
+        mutate(text = cleanText(text),
+               source = "twitter")
+
+# clean blogs data (sample)
+blogs_df <- sample_frac(blogs, .01) %>% 
+        tibble::rownames_to_column(., var = "line_id") %>% 
+        rename(., text = X1) %>% 
+        mutate(text = cleanText(text),
+               source = "blogs")
+
+# clean news data (sample)
+news_df <- sample_frac(news, .01) %>% 
+        tibble::rownames_to_column(., var = "line_id") %>% 
+        rename(., text= X1) %>% 
+        mutate(text = cleanText(text),
+               source = "news")
+
+# combine all datasets to analyze different tokenization
+token_df <- bind_rows(twitter_df, blogs_df, news_df) 
+
+head(token_df, 5)
+unique(token_df$source)
+
+```
+
+## Part 2: Exploratory Analysis
+
+Now that we have a cleaned data frame with all sources together - we are ready to begin our analysis.
+
+I focused on analyzing term frequency and term frequency / inverse document frequency by various n-grams to see which words or string of words are the most impactful in each data set. 
+
+Results are listed below:
+
+```{r EDA, echo=FALSE, include=TRUE, message = F}
+# top words without stop words
+# top words without stop words
+token_df %>%
+        tidytext::unnest_tokens(word, text) %>% 
+        group_by(word) %>%
+        anti_join(stop_words) %>% 
+        summarize(count = n()) %>%
+        mutate(freq = count / sum(.$count)) %>% 
+        filter(count > 1) %>% 
+        arrange(., -freq) %>% 
+        top_n(15) %>% 
+        ungroup() %>% 
+        mutate(word = reorder(word, freq)) %>% 
+        ggplot(aes(x = as.factor(word), y = freq)) +
+        geom_col(show.legend = F, fill = "dark blue") +
+        coord_flip() +
+        theme_few() +
+        xlab("Word") + 
+        ylab("Frequency") + 
+        labs(title = "Top 25 Words by Frequency",
+             subtitle = 'Excluding Stop Words') +
+        scale_y_continuous(labels = scales::percent)
+
+# top words with stop words
+token_df %>%
+        tidytext::unnest_tokens(word, text) %>% 
+        group_by(word) %>%
+        summarize(count = n()) %>%
+        mutate(freq = count / sum(.$count)) %>% 
+        filter(count > 1) %>% 
+        arrange(., -freq) %>% 
+        top_n(15) %>% 
+        ungroup() %>% 
+        mutate(word = reorder(word, freq)) %>% 
+        ggplot(aes(x = as.factor(word), y = freq)) +
+        geom_col(show.legend = F, fill = "dark red") +
+        coord_flip() +
+        theme_few() +
+        xlab("Word") + 
+        ylab("Frequency") + 
+        labs(title = "Top 25 Words by Frequency",
+             subtitle = 'Including Stop Words') +
+        scale_y_continuous(labels = scales::percent)
+
+
+# tf_idf across each data set!
+(tf_idf_df <- token_df %>% 
+        tidytext::unnest_tokens(word, text) %>% 
+        group_by(word, source) %>% 
+        summarize(count = n()) %>% 
+        bind_tf_idf(., term = word, document = source, n = count) %>% 
+        arrange(desc(tf_idf)) %>% 
+        ungroup())
+
+# visualize tf_idf
+tf_idf_df %>%
+        arrange(desc(tf_idf)) %>%
+        mutate(word = factor(word, levels = rev(unique(word)))) %>% 
+        group_by(source) %>% 
+        top_n(15) %>% 
+        ungroup() %>%
+        ggplot(aes(word, tf_idf, fill = source)) +
+        geom_col(show.legend = FALSE) +
+        labs(x = NULL, y = "tf-idf") +
+        facet_wrap(~source, ncol = 2, scales = "free") +
+        coord_flip() +
+        theme_few() + 
+        scale_y_continuous(labels = scales::percent) +
+        xlab("Words") +
+        ylab("TF-IDF") +
+        labs(title = "Top 25 Words by TF-IDF",
+             subtitle = "Compared across each source")
+
+
+
+
+## n gram analysis
+
+# top words without stop words
+token_df %>%
+        tidytext::unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+        group_by(bigram) %>% 
+        summarize(count = n()) %>% 
+        mutate(freq = count / sum(.$count)) %>% 
+        filter(count > 1) %>% 
+        arrange(., -freq) %>% 
+        top_n(15) %>% 
+        ungroup() %>% 
+        mutate(bigram = reorder(bigram, freq)) %>% 
+        ggplot(aes(x = as.factor(bigram), y = freq)) +
+        geom_col(show.legend = F, fill = "dark blue") +
+        coord_flip() +
+        theme_few() +
+        xlab("Bigram") + 
+        ylab("Frequency") + 
+        labs(title = "Top 25 Bigrams by Frequency",
+             subtitle = 'Including Stop Words') +
+        scale_y_continuous(labels = scales::percent)
+
+# tf_idf across each data set!
+tf_idf_df <- token_df %>% 
+                tidytext::unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+                group_by(bigram, source) %>% 
+                summarize(count = n()) %>% 
+                bind_tf_idf(., term = bigram, document = source, n = count) %>% 
+                arrange(desc(tf_idf)) %>% 
+                ungroup()
+
+## word cloud analysis
+
+token_df %>%
+        tidytext::unnest_tokens(word, text) %>% 
+        group_by(word) %>%
+        anti_join(stop_words) %>% 
+        summarize(count = n()) %>% 
+        with(wordcloud(word, count, max.words = 100, colors = brewer.pal(8,"Dark2")))
+
+
+```
+
+## Part 3: Plans for Modeling
+
+The next steps for this project including building a predictive model and developing an online data project. I would like to explore storing this data and processing these text values with parallel computing. 
+
+It is also apparent that additional cleaning steps will need to be taken to remove or account for more "text message" wording that is not directly filtered out currently. 
